@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Auth\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,7 +26,11 @@ Route::group(['middleware' => 'api','prefix' => 'auth'], function ($router) {
     Route::post('/register', 'App\Http\Controllers\Api\Auth\RegisterController@store')->name('api.auth.register');
     Route::post('/forgot', 'App\Http\Controllers\Api\Auth\ForgotPasswordController@store')->name('api.auth.forgot.password');
 
+
     Route::group(['middleware' => 'jwt.auth'], function() {
+
+
+
         Route::post('/change', 'App\Http\Controllers\Api\Auth\ChangePasswordController@store')->name('api.auth.change.password');
         Route::get('/logout', 'App\Http\Controllers\Api\Auth\LogoutController@get')->name('api.auth.logout');
         Route::get('/me', 'App\Http\Controllers\Api\Auth\UserController@show')->name('api.auth.user');
@@ -43,7 +48,9 @@ Route::group(['middleware' => 'api','prefix' => 'auth'], function ($router) {
 });
 
 Route::group(['middleware' => 'jwt.auth'], function ($router) {
-
+    Route::post('user/photo', [UserController::class, 'updatePhoto']);
+    Route::get('/user', [UserController::class, 'fetch']);
+    Route::post('/user', [UserController::class, 'updateProfile']);
 });
 
 Route::group(['middleware' => 'api','prefix' => 'quiz'], function ($router) {
@@ -64,7 +71,7 @@ Route::apiResource('categories', 'App\Http\Controllers\Api\Categories\Categories
 Route::apiResource('media', 'App\Http\Controllers\Api\Media\MediaController')->middleware('jwt.auth');
 Route::apiResource('tutorial', 'App\Http\Controllers\Api\Media\TutorialsController')->middleware('jwt.auth');
 Route::apiResource('comments', 'App\Http\Controllers\Api\Media\CommentController')->middleware('jwt.auth');
-Route::apiResource('modalmessage', 'App\Http\Controllers\ModalMessageController');
+Route::apiResource('modalmessage', 'App\Http\Controllers\ModalMessageController')->middleware(['jwt.auth','throttle:4,10']);
 
 Route::group(['middleware' => 'api','prefix' => 'comments'], function ($router) {
     Route::get('showcomment/{id}','App\Http\Controllers\Api\Media\CommentController@showComment')->middleware('jwt.auth');

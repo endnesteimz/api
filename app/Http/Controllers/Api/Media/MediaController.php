@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Media;
 
+use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Tutorials\MediaResource;
 use App\Models\Media;
@@ -37,13 +38,16 @@ class MediaController extends Controller
                 'type'=>$request->type,
             ]);
 
-            return new MediaResource($media);
+            return ResponseFormatter::success(
+                $media,
+                ''
+            );
 
         } catch(\Exception $exception) {
-            return response([
-                'status' => 'error',
-                'message' => "Error: Category not created!, please try again. - {$exception->getMessage()}"
-            ], 500);
+            return ResponseFormatter::error([
+                'message' => 'Something went wrong',
+                'error' => $exception
+            ], 'Not created', 500);
         }
     }
 
@@ -57,9 +61,17 @@ class MediaController extends Controller
      */
     public function show($id)
     {
-        $media = Media::findOrfail($id);
+        $media = Media::find($id);
 
-        return new MediaResource($media);
+        if ($media) {
+            return ResponseFormatter::success(
+                $media,''
+            );
+        }else {
+            return ResponseFormatter::error(
+                null,'Not found','404'
+            );
+        }
     }
 
     /**

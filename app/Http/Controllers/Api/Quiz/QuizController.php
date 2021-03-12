@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Quiz;
 
+use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Quiz\AnswerResource;
 use App\Http\Resources\Quiz\GetQuizResource;
@@ -74,13 +75,24 @@ class QuizController extends Controller
     {
         $quiz = Quiz::find($id);
 
-        $questionId = request()->question_id ? request()->question_id : 0;
-        $question = Question::getQuestion($quiz->id, $questionId);
+        if ($quiz) {
+            $questionId = request()->question_id ? request()->question_id : 0;
+            $question = Question::getQuestion($quiz->id, $questionId);
 
-        return response()->json([
-            'quiz' => $quiz,
-            'question' => $question,
-        ]);
+            return ResponseFormatter::success([
+                'user' => [
+                    'quiz'=>$quiz,
+                    'question' => $question
+                ]
+            ], 'Fetched quiz');
+        }else {
+            return ResponseFormatter::error(
+                '',
+                'Not found quiz',
+                404
+            );
+        }
+
     }
 
     public function postResultAnswer(Request $request)

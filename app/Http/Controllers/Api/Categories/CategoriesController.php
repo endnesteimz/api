@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Categories;
 
+use App\Helpers\ResponseFormatter;
 use App\Http\Resources\Category\CategoryResource;
 use App\Http\Resources\Tutorials\TutorialResource;
 use App\Models\Category;
@@ -15,7 +16,12 @@ class CategoriesController extends Controller
 
     public function index()
     {
-        return CategoryResource::collection(Category::where('parent_id',0)->with('children')->paginate(25));
+        $category = Category::where('parent_id',0)->with('children')->get();
+
+        return ResponseFormatter::success(
+            $category,
+            ''
+        );
     }
 
     /**
@@ -50,9 +56,17 @@ class CategoriesController extends Controller
      */
     public function show($id)
     {
-        $category = Category::findOrfail($id);
+        $category = Category::find($id);
+        if ($category) {
+            return ResponseFormatter::success(
+                $category,''
+            );
+        }else {
+            return ResponseFormatter::error(
+                null,'Not found','404'
+            );
+        }
 
-        return new CategoryResource($category);
     }
 
     /**
@@ -99,7 +113,12 @@ class CategoriesController extends Controller
 
     public function tutorialList($id)
     {
-        return TutorialResource::collection(Tutorial::where('category_id',$id)->get());
+        $tutorial =Tutorial::where('category_id',$id)->get();
+
+        return ResponseFormatter::success(
+            $tutorial,
+            ''
+        );
     }
 
 }

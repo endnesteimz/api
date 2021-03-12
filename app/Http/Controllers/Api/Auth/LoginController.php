@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Helpers\ResponseFormatter;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ResponseApiToken;
+use App\Models\User;
 use JWTAuth;
 use Socialite;
 
@@ -23,13 +25,18 @@ class LoginController extends Controller
         $credentials = request(['email', 'password']);
 
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json([
-                'error' => 'Unauthorized',
-                'message' => 'User not found'
-            ], 401);
+            return ResponseFormatter::error([
+                'message' => 'User not found',
+                'error' => 'Unauthorized'
+            ], 'Authentication Failed', 401);
         }
 
-        return $this->respondWithToken($token);
+        $user = User::where('email', $request->email)->first();
+        return ResponseFormatter::success([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user
+        ], 'Authenticated');
     }
 
     public function redirectToGoogle()

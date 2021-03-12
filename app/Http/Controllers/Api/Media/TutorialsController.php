@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Media;
 
+use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Tutorials\MediaResource;
 use App\Http\Resources\Tutorials\TutorialResource;
@@ -18,7 +19,10 @@ class TutorialsController extends Controller
      */
     public function index()
     {
-        return TutorialResource::collection(Tutorial::where('parent_id',0)->with('children')->paginate(25));
+        $tutorial = Tutorial::where('parent_id',0)->with('children')->get();
+        return ResponseFormatter::success(
+            $tutorial
+        );
     }
 
 
@@ -56,9 +60,17 @@ class TutorialsController extends Controller
      */
     public function show($id)
     {
-        $tutorial = Tutorial::findOrfail($id);
+        $tutorial = Tutorial::find($id);
 
-        return new TutorialResource($tutorial);
+        if ($tutorial) {
+            return ResponseFormatter::success(
+                $tutorial,''
+            );
+        }else {
+            return ResponseFormatter::error(
+                null,'Not found','404'
+            );
+        }
     }
 
     /**

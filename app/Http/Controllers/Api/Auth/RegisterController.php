@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Helpers\ResponseFormatter;
 use App\Models\User;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class RegisterController extends Controller
 {
@@ -14,10 +16,14 @@ class RegisterController extends Controller
      * @param RegisterRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(RegisterRequest $request)
+    public function store(Request $request)
     {
         try {
-
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'password' => ['required']
+            ]);
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -26,15 +32,14 @@ class RegisterController extends Controller
             $user->save();
 
         } catch (\Exception $exception) {
-            return response([
-                'status' => 'error',
-                'message' => "Failed to register user, please try again. {$exception->getMessage()}"
-            ], 500);
+            return ResponseFormatter::error([
+                'message' => 'Something went wrong',
+                'error' => $exception
+            ], 'Authentication Failed', 500);
         }
 
-        return response([
-            'status' => 'success',
-            'data' => $user
-        ], 200);
+        return ResponseFormatter::success([
+            'user' => $user
+        ], 'Authenticated');
     }
 }

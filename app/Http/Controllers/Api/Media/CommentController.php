@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\Media;
+use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Tutorials\CommentResource;
 use App\Models\Comment;
@@ -9,7 +10,19 @@ class CommentController extends Controller
 {
     public function showComment($id)
     {
-        return  CommentResource::collection(Comment::showByPost($id));
+        if (Comment::showByPost($id)) {
+            return ResponseFormatter::success(
+                Comment::showByPost($id),
+                ''
+            );
+        }else {
+            return ResponseFormatter::error(
+                null,
+                'Not data',
+                '200'
+            );
+        }
+
     }
 
     public function store($id)
@@ -23,7 +36,10 @@ class CommentController extends Controller
                 'parent_id'=>$parentID,
             ]);
 
-            return new CommentResource($category);
+            return ResponseFormatter::success(
+                $category,
+                '',
+            );
 
         } catch(\Exception $exception) {
             return response([
