@@ -1,14 +1,4 @@
 openapi: 3.0.3
-info:
-  title: clubi
-  version: 1.0.2
-  contact:
-    email: franek@franeklubi.com
-    name: franeklubi
-    url: 'http://franeklubi.com'
-  license:
-    name: MIT License
-    url: 'https://github.com/franeklubi/clubi/blob/master/LICENSE'
 servers:
   - url: 'https://clubi.franeklubi.com/api'
     variables: {}
